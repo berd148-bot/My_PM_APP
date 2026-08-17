@@ -1,0 +1,910 @@
+<title>AirPark</title>
+<style>
+/*__FONTS_CSS__*/
+
+:root{
+  color-scheme: light;
+  --ground:#F3F7F0;
+  --surface:#FFFFFF;
+  --surface-2:#EAF1E6;
+  --ink:#142420;
+  --ink-secondary:#47584F;
+  --ink-muted:#7C8C82;
+  --border:#D7E3D0;
+  --accent:#0EA99A;
+  --accent-strong:#087F74;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#DCF4EF;
+  --shadow:rgba(20,40,30,0.14);
+  --status-good:#0ca30c;
+  --status-warning:#fab219;
+  --status-serious:#ec835a;
+  --status-critical:#d03b3b;
+  --status-unknown:#9AA5A0;
+  --badge-ink-dark:#14231F;
+  --badge-ink-light:#FFFFFF;
+  --map-water:#BFE3EE;
+  --map-neighbor:#DCE6D8;
+  --map-thailand:#CDEAD8;
+  --map-thailand-stroke:#7FBF9B;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#0D1512;
+    --surface:#142019;
+    --surface-2:#1B2A22;
+    --ink:#EAF3EC;
+    --ink-secondary:#A9BDB0;
+    --ink-muted:#71857A;
+    --border:#24352B;
+    --accent:#2BE0C9;
+    --accent-strong:#55EDD9;
+    --accent-ink:#06231F;
+    --accent-soft:#10332E;
+    --shadow:rgba(0,0,0,0.45);
+    --map-water:#123138;
+    --map-neighbor:#1E2C22;
+    --map-thailand:#20402E;
+    --map-thailand-stroke:#3E8564;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#0D1512;
+  --surface:#142019;
+  --surface-2:#1B2A22;
+  --ink:#EAF3EC;
+  --ink-secondary:#A9BDB0;
+  --ink-muted:#71857A;
+  --border:#24352B;
+  --accent:#2BE0C9;
+  --accent-strong:#55EDD9;
+  --accent-ink:#06231F;
+  --accent-soft:#10332E;
+  --shadow:rgba(0,0,0,0.45);
+  --map-water:#123138;
+  --map-neighbor:#1E2C22;
+  --map-thailand:#20402E;
+  --map-thailand-stroke:#3E8564;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:'IBM Plex Sans Thai', system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+}
+h1,h2,h3,h4{
+  font-family:'Kanit', 'IBM Plex Sans Thai', sans-serif;
+  font-weight:800;
+  margin:0;
+  text-wrap:balance;
+  letter-spacing:0.005em;
+}
+p{margin:0;}
+a{color:var(--accent-strong);}
+button{font-family:inherit;}
+.tabular{font-variant-numeric:tabular-nums;}
+.data-num{font-family:'Chakra Petch', 'Kanit', monospace; font-weight:700; font-variant-numeric:tabular-nums;}
+
+.wrap{max-width:1400px; margin:0 auto; padding:0 28px;}
+
+/* ---------- header ---------- */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.site-header .wrap{
+  display:flex; align-items:center; justify-content:space-between;
+  padding-top:14px; padding-bottom:14px; gap:16px;
+}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand-mark{
+  width:38px; height:38px; border-radius:11px;
+  background:linear-gradient(155deg, var(--accent), var(--accent-strong));
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.brand-mark svg{width:22px; height:22px;}
+.brand-name{font-family:'Kanit'; font-weight:800; font-size:1.3rem; letter-spacing:0.01em;}
+.brand-tag{font-size:0.78rem; color:var(--ink-muted); margin-top:-2px;}
+.header-actions{display:flex; align-items:center; gap:10px;}
+.icon-btn{
+  border:1px solid var(--border); background:var(--surface); color:var(--ink);
+  width:40px; height:40px; border-radius:12px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:border-color .15s, transform .15s;
+}
+.icon-btn:hover{border-color:var(--accent); transform:translateY(-1px);}
+.icon-btn svg{width:19px; height:19px;}
+.text-btn{
+  border:1px solid var(--border); background:var(--surface); color:var(--ink);
+  padding:9px 16px; border-radius:12px; cursor:pointer; font-size:0.88rem; font-weight:600;
+  display:flex; align-items:center; gap:6px; transition:border-color .15s, transform .15s;
+  white-space:nowrap;
+}
+.text-btn:hover{border-color:var(--accent); transform:translateY(-1px);}
+
+/* ---------- hero ---------- */
+.hero{
+  position:relative; overflow:hidden;
+  padding:56px 0 40px;
+  background:
+    radial-gradient(760px 420px at 12% -10%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 60%),
+    radial-gradient(620px 420px at 100% 0%, color-mix(in srgb, #FF8A3D 24%, transparent), transparent 60%);
+}
+.hero-contour{
+  position:absolute; inset:0; z-index:0; opacity:0.5; pointer-events:none;
+  background-image: repeating-radial-gradient(circle at 82% 18%, transparent 0, transparent 26px, color-mix(in srgb, var(--accent) 16%, transparent) 27px, transparent 28px);
+  mask-image:linear-gradient(to bottom, black, transparent 85%);
+}
+.hero-inner{position:relative; z-index:1;}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:0.78rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase;
+  color:var(--accent-strong); background:var(--accent-soft);
+  padding:6px 14px; border-radius:100px; margin-bottom:18px;
+}
+.hero-dot{width:7px; height:7px; border-radius:50%; background:var(--status-good); animation:pulse 2.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.35;}}
+.hero-title{font-size:clamp(2rem, 4vw, 3.4rem); line-height:1.08; max-width:20ch;}
+.hero-title .accent-word{color:var(--accent-strong);}
+.hero-sub{margin-top:16px; font-size:1.05rem; color:var(--ink-secondary); max-width:56ch;}
+.hero-sub b{color:var(--ink); font-weight:700;}
+
+.controls{
+  margin-top:30px; display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+  background:var(--surface); border:1px solid var(--border); border-radius:18px;
+  padding:14px 16px; box-shadow:0 10px 30px -18px var(--shadow);
+}
+.chip-row{display:flex; flex-wrap:wrap; gap:8px; flex:1; min-width:220px;}
+.chip{
+  border:1px solid var(--border); background:var(--surface-2); color:var(--ink-secondary);
+  font-size:0.83rem; font-weight:600; padding:7px 13px; border-radius:100px; cursor:pointer;
+  transition:all .15s; white-space:nowrap;
+}
+.chip:hover{border-color:var(--accent);}
+.chip.active{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.control-divider{width:1px; align-self:stretch; background:var(--border); margin:0 2px;}
+.select-wrap{position:relative;}
+select.sort-select{
+  appearance:none; border:1px solid var(--border); background:var(--surface-2); color:var(--ink);
+  padding:9px 34px 9px 14px; border-radius:12px; font-size:0.86rem; font-weight:600; cursor:pointer;
+}
+.select-wrap::after{
+  content:"▾"; position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  pointer-events:none; color:var(--ink-muted); font-size:0.7rem;
+}
+.locate-btn{
+  border:none; background:var(--accent); color:var(--accent-ink);
+  padding:10px 18px; border-radius:12px; font-weight:700; font-size:0.87rem; cursor:pointer;
+  display:flex; align-items:center; gap:7px; transition:transform .15s, box-shadow .15s;
+}
+.locate-btn:hover{transform:translateY(-1px); box-shadow:0 8px 20px -10px var(--accent);}
+.locate-btn svg{width:16px; height:16px;}
+#geoStatus{font-size:0.8rem; color:var(--ink-muted); margin-top:8px;}
+
+/* top strip */
+.top-strip{margin-top:26px; display:flex; gap:14px; overflow-x:auto; padding-bottom:6px;}
+.top-card{
+  flex:0 0 auto; width:230px; background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:14px; cursor:pointer; transition:transform .15s, border-color .15s;
+  display:flex; flex-direction:column; gap:8px;
+}
+.top-card:hover{transform:translateY(-3px); border-color:var(--accent);}
+.top-rank{font-family:'Chakra Petch'; font-weight:700; font-size:0.75rem; color:var(--ink-muted);}
+.top-card .name{font-weight:700; font-size:0.95rem; line-height:1.3;}
+.top-card .prov{font-size:0.76rem; color:var(--ink-muted);}
+.top-metric{display:flex; align-items:baseline; gap:5px; margin-top:2px;}
+.top-metric .num{font-size:1.5rem;}
+.top-metric .unit{font-size:0.72rem; color:var(--ink-muted);}
+
+/* ---------- main layout ---------- */
+.main-section{padding:44px 0 70px;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:20px; flex-wrap:wrap;}
+.section-head h2{font-size:1.5rem;}
+.result-count{font-size:0.85rem; color:var(--ink-muted);}
+
+.layout-grid{display:grid; grid-template-columns:minmax(300px, 400px) 1fr; gap:26px; align-items:start;}
+@media (max-width:980px){ .layout-grid{grid-template-columns:1fr;} }
+
+.map-panel{
+  position:sticky; top:92px; background:var(--surface); border:1px solid var(--border);
+  border-radius:20px; padding:18px; box-shadow:0 10px 30px -20px var(--shadow);
+}
+@media (max-width:980px){ .map-panel{position:static;} }
+.map-panel h3{font-size:1.05rem; margin-bottom:4px;}
+.map-caption{font-size:0.82rem; color:var(--ink-muted); min-height:2.6em; margin-top:6px;}
+.map-caption b{color:var(--ink); font-weight:700;}
+.map-svg-wrap{position:relative;}
+#thailand-map{width:100%; height:auto; display:block;}
+.map-neighbor{fill:var(--map-neighbor); stroke:none;}
+.map-water-shape{fill:var(--map-water); stroke:none;}
+.map-thailand-shape{fill:var(--map-thailand); stroke:var(--map-thailand-stroke); stroke-width:1.1;}
+.map-pins .pin-halo{fill:none; opacity:0; transition:opacity .15s;}
+.map-pins g.pin{cursor:pointer;}
+.map-pins g.pin:hover .pin-halo, .map-pins g.pin:focus .pin-halo{opacity:0.35;}
+.map-pins .pin-dot{stroke:var(--surface); stroke-width:3;}
+.map-legend-mini{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; font-size:0.74rem; color:var(--ink-muted);}
+.map-legend-mini span{display:inline-flex; align-items:center; gap:5px;}
+.map-legend-mini i{width:9px; height:9px; border-radius:50%; display:inline-block;}
+
+.grid-scroll{max-height:none;}
+.cards-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(270px, 1fr)); gap:18px;}
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:18px; overflow:hidden;
+  cursor:pointer; display:flex; flex-direction:column; transition:transform .15s, box-shadow .15s, border-color .15s;
+}
+.card:hover{transform:translateY(-4px); box-shadow:0 16px 34px -18px var(--shadow); border-color:var(--accent);}
+.card-img{position:relative; height:150px; overflow:hidden;}
+.card-img img{width:100%; height:100%; object-fit:cover; display:block;}
+.card-img .prov-tag{
+  position:absolute; left:10px; top:10px; background:rgba(10,20,15,0.55); color:#fff;
+  font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:100px; backdrop-filter:blur(3px);
+}
+.card-img .dist-tag{
+  position:absolute; right:10px; top:10px; background:rgba(10,20,15,0.55); color:#fff;
+  font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:100px; backdrop-filter:blur(3px);
+}
+.card-body{padding:14px 14px 16px; display:flex; flex-direction:column; gap:10px; flex:1;}
+.card-title{font-family:'Kanit'; font-weight:700; font-size:1.02rem; line-height:1.3;}
+.card-title small{display:block; font-family:'IBM Plex Sans Thai'; font-weight:400; font-size:0.74rem; color:var(--ink-muted); margin-top:1px;}
+.card-metrics{display:flex; align-items:center; gap:12px;}
+.gauge-wrap{position:relative; width:58px; height:58px; flex-shrink:0;}
+.gauge-wrap svg{width:100%; height:100%; transform:rotate(-90deg);}
+.gauge-track{fill:none; stroke:var(--surface-2); stroke-width:7;}
+.gauge-fill{fill:none; stroke-width:7; stroke-linecap:round; transition:stroke-dasharray .5s ease;}
+.gauge-num{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.95rem;}
+.card-metrics .metric-info{flex:1; min-width:0;}
+.badge{
+  display:inline-flex; align-items:center; gap:5px; font-size:0.72rem; font-weight:700;
+  padding:4px 10px; border-radius:100px; white-space:nowrap;
+}
+.weather-line{display:flex; align-items:center; gap:6px; font-size:0.78rem; color:var(--ink-muted); margin-top:2px;}
+.weather-line svg{width:14px; height:14px; flex-shrink:0;}
+.activity-line{font-size:0.8rem; color:var(--ink-secondary); border-top:1px dashed var(--border); padding-top:10px; margin-top:2px;}
+.card-cta{
+  margin-top:auto; text-align:center; font-size:0.8rem; font-weight:700; color:var(--accent-strong);
+  padding-top:8px;
+}
+
+/* ---------- modal ---------- */
+.overlay{
+  position:fixed; inset:0; background:rgba(6,14,10,0.55); backdrop-filter:blur(3px);
+  display:none; align-items:flex-start; justify-content:center; z-index:100; padding:40px 16px; overflow-y:auto;
+}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--surface); border-radius:22px; max-width:720px; width:100%;
+  border:1px solid var(--border); overflow:hidden; animation:modalIn .2s ease;
+}
+@keyframes modalIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+.modal-img{position:relative; height:230px;}
+.modal-img img{width:100%; height:100%; object-fit:cover; display:block;}
+.modal-close{
+  position:absolute; top:14px; right:14px; width:36px; height:36px; border-radius:50%;
+  background:rgba(10,20,15,0.55); color:#fff; border:none; cursor:pointer; font-size:1.1rem;
+  display:flex; align-items:center; justify-content:center;
+}
+.modal-body{padding:24px 26px 28px; display:flex; flex-direction:column; gap:18px;}
+.modal-title{font-size:1.5rem;}
+.modal-title small{display:block; font-family:'IBM Plex Sans Thai'; font-weight:500; font-size:0.85rem; color:var(--ink-muted); margin-top:3px;}
+.modal-stat-row{display:flex; gap:20px; flex-wrap:wrap;}
+.modal-stat{display:flex; align-items:center; gap:12px;}
+.modal-stat .gauge-wrap{width:76px; height:76px;}
+.modal-stat .gauge-num{font-size:1.25rem;}
+.modal-stat-info .label{font-size:0.75rem; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.06em; font-weight:700;}
+.modal-stat-info .value{font-size:1.05rem; font-weight:700; margin-top:2px;}
+.detail-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.detail-item{background:var(--surface-2); border-radius:12px; padding:10px 12px;}
+.detail-item .k{font-size:0.7rem; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:700;}
+.detail-item .v{font-size:0.98rem; font-weight:700; margin-top:3px;}
+.activity-box{
+  background:var(--accent-soft); border-radius:14px; padding:14px 16px; font-size:0.9rem; color:var(--ink);
+  display:flex; gap:10px; align-items:flex-start;
+}
+.activity-box svg{width:20px; height:20px; flex-shrink:0; margin-top:1px; color:var(--accent-strong);}
+.forecast-block h4{font-size:0.95rem; margin-bottom:10px;}
+.forecast-svg-wrap{position:relative;}
+.forecast-tooltip{
+  position:absolute; pointer-events:none; background:var(--ink); color:var(--ground);
+  font-size:0.72rem; padding:5px 9px; border-radius:8px; transform:translate(-50%,-120%); opacity:0; transition:opacity .1s;
+  white-space:nowrap; font-weight:600;
+}
+.meta-row{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:0.78rem; color:var(--ink-muted); border-top:1px solid var(--border); padding-top:14px;}
+.meta-row a{color:var(--ink-muted); text-decoration:underline;}
+.credit-line{font-size:0.72rem; color:var(--ink-muted);}
+
+/* ---------- legend modal ---------- */
+.legend-list{display:flex; flex-direction:column; gap:12px;}
+.legend-row{display:flex; align-items:center; gap:12px; padding:10px 12px; background:var(--surface-2); border-radius:12px;}
+.legend-row .badge{min-width:120px; justify-content:center;}
+.legend-row .range{font-size:0.75rem; color:var(--ink-muted); min-width:90px;}
+.legend-row .desc{font-size:0.82rem; color:var(--ink-secondary); flex:1;}
+
+/* ---------- footer ---------- */
+.site-footer{border-top:1px solid var(--border); padding:34px 0 50px; background:var(--surface-2);}
+.footer-grid{display:flex; flex-wrap:wrap; gap:30px; justify-content:space-between;}
+.footer-col h5{font-size:0.8rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--ink-muted); margin-bottom:10px;}
+.footer-col p, .footer-col a{font-size:0.82rem; color:var(--ink-secondary); display:block; line-height:1.9; text-decoration:none;}
+.footer-col a:hover{color:var(--accent-strong);}
+.credits-list{columns:2; column-gap:24px; max-width:520px;}
+.credits-list a{font-size:0.74rem; break-inside:avoid;}
+.footer-bottom{margin-top:26px; padding-top:18px; border-top:1px dashed var(--border); font-size:0.76rem; color:var(--ink-muted);}
+
+.empty-state{padding:60px 20px; text-align:center; color:var(--ink-muted);}
+.visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+</style>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4a4 4 0 0 0-4 4c0 3 4 8 4 8s4-5 4-8a4 4 0 0 0-4-4z"/><path d="M9 20c0-3 2-5 4-5s4 2 4 5"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">AirPark</div>
+        <div class="brand-tag">เช็คฝุ่น เช็คฝน ก่อนออกไปวิ่ง</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="text-btn" id="legendBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        เกณฑ์การประเมิน
+      </button>
+      <button class="icon-btn" id="themeToggle" aria-label="สลับธีมสว่าง/มืด" title="สลับธีมสว่าง/มืด">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-contour"></div>
+  <div class="wrap hero-inner">
+    <div class="eyebrow"><span class="hero-dot"></span> ข้อมูลจริง อัปเดตอัตโนมัติทุก 1 ชั่วโมง</div>
+    <h1 class="hero-title" id="heroTitle">กำลังโหลดข้อมูลสวน...</h1>
+    <p class="hero-sub" id="heroSub"></p>
+
+    <div class="controls">
+      <div class="chip-row" id="provinceChips"></div>
+      <div class="control-divider"></div>
+      <div class="select-wrap">
+        <select class="sort-select" id="sortSelect">
+          <option value="aqi">แนะนำ (อากาศดีสุดก่อน)</option>
+          <option value="name">ชื่อสวน ก–ฮ</option>
+          <option value="distance" id="distOption" disabled>ใกล้ฉันก่อน</option>
+        </select>
+      </div>
+      <button class="locate-btn" id="locateBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M17.66 6.34l1.41-1.41M6.34 17.66l-1.41 1.41"/></svg>
+        หาสวนใกล้ฉัน
+      </button>
+    </div>
+    <div id="geoStatus"></div>
+
+    <div class="top-strip" id="topStrip"></div>
+  </div>
+</section>
+
+<main class="main-section">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>สวนสาธารณะทั่วประเทศ</h2>
+      <span class="result-count" id="resultCount"></span>
+    </div>
+    <div class="layout-grid">
+      <div class="map-panel">
+        <h3>แผนที่สถานะอากาศ</h3>
+        <div class="map-caption" id="mapCaption">คลิกหมุดเพื่อดูรายละเอียดสวนแต่ละแห่ง</div>
+        <div class="map-svg-wrap">
+          <!--__MAP_SVG__-->
+        </div>
+        <div class="map-legend-mini" id="mapLegendMini"></div>
+      </div>
+      <div class="grid-scroll">
+        <div class="cards-grid" id="cardsGrid"></div>
+        <div class="empty-state" id="emptyState" style="display:none;">ไม่พบสวนในจังหวัดที่เลือก ลองเลือก "ทั้งหมด" อีกครั้ง</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="overlay" id="detailOverlay">
+  <div class="modal" role="dialog" aria-modal="true" id="detailModal"></div>
+</div>
+
+<div class="overlay" id="legendOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-body">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <h3 class="modal-title">เกณฑ์ประเมินความเหมาะสมกับการออกกำลังกาย</h3>
+        <button class="icon-btn" id="legendClose" aria-label="ปิด">✕</button>
+      </div>
+      <p style="color:var(--ink-secondary); font-size:0.88rem;">ประเมินจากค่าฝุ่น PM2.5 เฉลี่ยรายชั่วโมง (ไมโครกรัม/ลูกบาศก์เมตร) ร่วมกับสภาพฝนขณะนั้น</p>
+      <div class="legend-list" id="legendList"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-col" style="max-width:320px;">
+        <h5>เกี่ยวกับ AirPark</h5>
+        <p>เว็บไซต์รวบรวมค่าฝุ่น PM2.5 และสภาพอากาศของสวนสาธารณะทั่วประเทศไทยแบบใกล้เคียงเวลาจริง เพื่อช่วยประเมินว่าช่วงเวลานี้เหมาะกับการออกกำลังกายกลางแจ้งแค่ไหน</p>
+      </div>
+      <div class="footer-col">
+        <h5>แหล่งข้อมูล</h5>
+        <a href="https://aqicn.org/" target="_blank" rel="noopener">AQICN — World Air Quality Index</a>
+        <a href="https://openweathermap.org/" target="_blank" rel="noopener">OpenWeatherMap</a>
+        <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons (ภาพประกอบ)</a>
+      </div>
+      <div class="footer-col" style="flex:1; min-width:260px;">
+        <h5>เครดิตภาพสวนสาธารณะ</h5>
+        <div class="credits-list" id="creditsList"></div>
+      </div>
+    </div>
+    <div class="footer-bottom" id="footerBottom"></div>
+  </div>
+</footer>
+
+<script>
+/*__PARKS_DATA__*/
+
+var PROJECTION = { top:20.6, bottom:5.4, left:97.1, right:106.0, w:1051.164, h:1849.133 };
+function latLonToXY(lat, lon){
+  var xFrac = (lon - PROJECTION.left) / (PROJECTION.right - PROJECTION.left);
+  var yFrac = (PROJECTION.top - lat) / (PROJECTION.top - PROJECTION.bottom);
+  return { x: xFrac * PROJECTION.w, y: yFrac * PROJECTION.h };
+}
+
+var TIER_ORDER = ["excellent","good","moderate","caution","avoid","unknown"];
+var TIER_COLOR = {
+  excellent: "var(--status-good)",
+  good: "var(--status-good)",
+  moderate: "var(--status-warning)",
+  caution: "var(--status-serious)",
+  avoid: "var(--status-critical)",
+  unknown: "var(--status-unknown)"
+};
+var TIER_TEXT_ON = {
+  excellent: "var(--badge-ink-light)",
+  good: "var(--badge-ink-light)",
+  moderate: "var(--badge-ink-dark)",
+  caution: "var(--badge-ink-dark)",
+  avoid: "var(--badge-ink-light)",
+  unknown: "var(--badge-ink-dark)"
+};
+var TIER_ICON = { excellent:"✦", good:"✓", moderate:"●", caution:"▲", avoid:"✕", unknown:"?" };
+var TIER_RANGE = {
+  excellent:"PM2.5 ≤ 15",
+  good:"PM2.5 15–25",
+  moderate:"PM2.5 25–37.5",
+  caution:"PM2.5 37.5–75",
+  avoid:"PM2.5 > 75",
+  unknown:"–"
+};
+
+var state = { province: "all", sort: "aqi", userLoc: null };
+var parks = (typeof PARKS_DATA !== "undefined") ? PARKS_DATA.parks.slice() : [];
+var generatedAt = (typeof PARKS_DATA !== "undefined") ? PARKS_DATA.generated_at_utc : null;
+
+function pm25MaxForSort(p){ return (p.pm25 === null || p.pm25 === undefined) ? 9999 : p.pm25; }
+
+function haversineKm(lat1, lon1, lat2, lon2){
+  var R = 6371;
+  var dLat = (lat2-lat1) * Math.PI/180;
+  var dLon = (lon2-lon1) * Math.PI/180;
+  var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  var c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R*c;
+}
+
+var THAI_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+function formatThaiDateTime(iso){
+  if(!iso) return "ไม่ทราบเวลา";
+  var d = new Date(iso);
+  if(isNaN(d.getTime())) return "ไม่ทราบเวลา";
+  var be = d.getFullYear() + 543;
+  var hh = String(d.getHours()).padStart(2,"0");
+  var mm = String(d.getMinutes()).padStart(2,"0");
+  return d.getDate() + " " + THAI_MONTHS[d.getMonth()] + " " + be + " · " + hh + ":" + mm + " น.";
+}
+function timeAgoTh(iso){
+  if(!iso) return "";
+  var d = new Date(iso);
+  if(isNaN(d.getTime())) return "";
+  var mins = Math.round((Date.now() - d.getTime())/60000);
+  if(mins < 1) return "เมื่อสักครู่";
+  if(mins < 60) return "เมื่อ " + mins + " นาทีที่แล้ว";
+  var hrs = Math.round(mins/60);
+  if(hrs < 24) return "เมื่อ " + hrs + " ชั่วโมงที่แล้ว";
+  return "เมื่อ " + Math.round(hrs/24) + " วันที่แล้ว";
+}
+
+function weatherIconSvg(id, isRaining){
+  var stroke = 'stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+  if(isRaining || (id>=500 && id<600) || (id>=300&&id<400)){
+    return '<svg viewBox="0 0 24 24" '+stroke+'><path d="M7 15a4 4 0 1 1 1.3-7.78A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 6.95"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>';
+  }
+  if(id>=200 && id<300){
+    return '<svg viewBox="0 0 24 24" '+stroke+'><path d="M7 15a4 4 0 1 1 1.3-7.78A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 6.95"/><path d="M11 17l-2 4M15 17l-2 4"/></svg>';
+  }
+  if(id>=600 && id<700){
+    return '<svg viewBox="0 0 24 24" '+stroke+'><path d="M7 15a4 4 0 1 1 1.3-7.78A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 6.95"/><circle cx="9" cy="19" r="0.5" fill="currentColor"/><circle cx="13" cy="19" r="0.5" fill="currentColor"/><circle cx="17" cy="19" r="0.5" fill="currentColor"/></svg>';
+  }
+  if(id>=700 && id<800){
+    return '<svg viewBox="0 0 24 24" '+stroke+'><path d="M3 8h14M6 12h14M3 16h14"/></svg>';
+  }
+  if(id===800){
+    return '<svg viewBox="0 0 24 24" '+stroke+'><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>';
+  }
+  return '<svg viewBox="0 0 24 24" '+stroke+'><path d="M7 15a4 4 0 1 1 1.3-7.78A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 6.95"/></svg>';
+}
+
+function gaugeSvg(pm25, tier, size, strokeWidth){
+  var pct = pm25 === null || pm25 === undefined ? 0 : Math.max(0, Math.min(1, pm25/120));
+  var r = (size - strokeWidth)/2;
+  var c = 2*Math.PI*r;
+  var dash = pct*c;
+  var color = TIER_COLOR[tier] || TIER_COLOR.unknown;
+  return '<div class="gauge-wrap" style="width:'+size+'px;height:'+size+'px;">'+
+    '<svg viewBox="0 0 '+size+' '+size+'">'+
+      '<circle class="gauge-track" cx="'+size/2+'" cy="'+size/2+'" r="'+r+'"/>'+
+      '<circle class="gauge-fill" cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" stroke="'+color+'" stroke-width="'+strokeWidth+'" stroke-dasharray="'+dash+' '+c+'"/>'+
+    '</svg>'+
+    '<div class="gauge-num data-num">'+(pm25===null||pm25===undefined?"–":Math.round(pm25))+'</div>'+
+  '</div>';
+}
+
+function badgeHtml(tier, label, size){
+  size = size || "normal";
+  var star = tier==="excellent" ? "" : "";
+  return '<span class="badge" style="background:'+TIER_COLOR[tier]+';color:'+TIER_TEXT_ON[tier]+';">'+
+    '<span aria-hidden="true">'+TIER_ICON[tier]+'</span>'+label+'</span>';
+}
+
+function getVisibleParks(){
+  var list = parks.filter(function(p){ return state.province==="all" || p.province===state.province; });
+  if(state.sort === "distance" && state.userLoc){
+    list.sort(function(a,b){ return (a._dist||9e9) - (b._dist||9e9); });
+  } else if(state.sort === "name"){
+    list.sort(function(a,b){ return a.name_th.localeCompare(b.name_th, "th"); });
+  } else {
+    list.sort(function(a,b){ return pm25MaxForSort(a) - pm25MaxForSort(b); });
+  }
+  return list;
+}
+
+function renderProvinceChips(){
+  var provinces = Array.from(new Set(parks.map(function(p){return p.province;}))).sort();
+  var el = document.getElementById("provinceChips");
+  var html = '<button class="chip active" data-prov="all">ทั้งหมด</button>';
+  provinces.forEach(function(pv){
+    html += '<button class="chip" data-prov="'+pv+'">'+pv+'</button>';
+  });
+  el.innerHTML = html;
+  el.querySelectorAll(".chip").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.province = btn.getAttribute("data-prov");
+      el.querySelectorAll(".chip").forEach(function(b){b.classList.remove("active");});
+      btn.classList.add("active");
+      renderCards(); renderMapPins(); renderHero();
+    });
+  });
+}
+
+function renderHero(){
+  var sorted = parks.slice().filter(function(p){return p.pm25!==null && p.pm25!==undefined;}).sort(function(a,b){return a.pm25-b.pm25;});
+  var best = sorted[0];
+  var titleEl = document.getElementById("heroTitle");
+  var subEl = document.getElementById("heroSub");
+  if(best){
+    titleEl.innerHTML = 'วันนี้ <span class="accent-word">'+best.name_th+'</span> อากาศดีที่สุดสำหรับออกกำลังกาย';
+    subEl.innerHTML = 'ค่าฝุ่น PM2.5 อยู่ที่ <b>'+Math.round(best.pm25)+' µg/m³</b> ('+best.tier_label_th+') ที่ '+best.province+' — เลื่อนลงไปดูสวนใกล้บ้านคุณ หรือกดปุ่ม "หาสวนใกล้ฉัน" ด้านล่าง';
+  } else {
+    titleEl.textContent = "เช็คสภาพอากาศสวนสาธารณะก่อนออกไปวิ่ง";
+  }
+}
+
+function renderTopStrip(){
+  var top3 = parks.slice().filter(function(p){return p.pm25!==null && p.pm25!==undefined;}).sort(function(a,b){return a.pm25-b.pm25;}).slice(0,5);
+  var el = document.getElementById("topStrip");
+  el.innerHTML = top3.map(function(p, i){
+    return '<div class="top-card" data-slug="'+p.slug+'">'+
+      '<div class="top-rank">อันดับ '+(i+1)+' · '+p.province+'</div>'+
+      '<div class="name">'+p.name_th+'</div>'+
+      '<div class="top-metric"><span class="num data-num" style="color:'+TIER_COLOR[p.tier]+'">'+Math.round(p.pm25)+'</span><span class="unit">µg/m³</span></div>'+
+      badgeHtml(p.tier, p.tier_label_th) +
+    '</div>';
+  }).join("");
+  el.querySelectorAll(".top-card").forEach(function(c){
+    c.addEventListener("click", function(){ openDetail(c.getAttribute("data-slug")); });
+  });
+}
+
+function renderCards(){
+  var list = getVisibleParks();
+  var grid = document.getElementById("cardsGrid");
+  var empty = document.getElementById("emptyState");
+  document.getElementById("resultCount").textContent = list.length + " สวน";
+  if(list.length===0){ grid.innerHTML=""; empty.style.display="block"; return; }
+  empty.style.display="none";
+  grid.innerHTML = list.map(function(p){
+    var distTag = (state.userLoc && p._dist!==undefined) ? '<span class="dist-tag">~'+p._dist.toFixed(0)+' กม.</span>' : '';
+    var weather = p.weather || {};
+    var wDesc = weather.desc_th ? weather.desc_th : "ไม่มีข้อมูลอากาศ";
+    var rainNote = weather.is_raining ? (' · ฝน '+weather.rain_1h_mm+' มม./ชม.') : '';
+    return '<div class="card" data-slug="'+p.slug+'" tabindex="0" role="button" aria-label="ดูรายละเอียด '+p.name_th+'">'+
+      '<div class="card-img"><img src="'+p.image+'" alt="'+p.name_th+'" loading="lazy"/>'+
+        '<span class="prov-tag">'+p.province+'</span>'+distTag+
+      '</div>'+
+      '<div class="card-body">'+
+        '<div class="card-title">'+p.name_th+'<small>'+p.name_en+'</small></div>'+
+        '<div class="card-metrics">'+
+          gaugeSvg(p.pm25, p.tier, 58, 7)+
+          '<div class="metric-info">'+badgeHtml(p.tier, p.tier_label_th)+
+            '<div class="weather-line">'+weatherIconSvg(weather.id, weather.is_raining)+'<span>'+wDesc+rainNote+(weather.temp_c!==null&&weather.temp_c!==undefined?' · '+Math.round(weather.temp_c)+'°C':'')+'</span></div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="activity-line">'+p.activity_th+'</div>'+
+        '<div class="card-cta">ดูรายละเอียด →</div>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+  grid.querySelectorAll(".card").forEach(function(c){
+    c.addEventListener("click", function(){ openDetail(c.getAttribute("data-slug")); });
+    c.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openDetail(c.getAttribute("data-slug")); } });
+  });
+}
+
+function renderMapPins(){
+  var svg = document.getElementById("thailand-map");
+  if(!svg) return;
+  var old = svg.querySelector(".map-pins");
+  if(old) old.remove();
+  var g = document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.setAttribute("class","map-pins");
+  parks.forEach(function(p){
+    var xy = latLonToXY(p.lat, p.lon);
+    var visible = state.province==="all" || p.province===state.province;
+    var pin = document.createElementNS("http://www.w3.org/2000/svg","g");
+    pin.setAttribute("class","pin");
+    pin.setAttribute("tabindex","0");
+    pin.setAttribute("opacity", visible ? "1" : "0.25");
+    pin.innerHTML =
+      '<circle class="pin-halo" cx="'+xy.x+'" cy="'+xy.y+'" r="20" fill="'+TIER_COLOR[p.tier]+'"></circle>'+
+      '<circle class="pin-dot" cx="'+xy.x+'" cy="'+xy.y+'" r="9" fill="'+TIER_COLOR[p.tier]+'"></circle>';
+    pin.addEventListener("mouseenter", function(){
+      document.getElementById("mapCaption").innerHTML = '<b>'+p.name_th+'</b> · '+p.province+' · PM2.5 '+(p.pm25!==null?Math.round(p.pm25):'–')+' · '+p.tier_label_th;
+    });
+    pin.addEventListener("click", function(){ openDetail(p.slug); });
+    pin.addEventListener("keydown", function(e){ if(e.key==="Enter"){ openDetail(p.slug); } });
+    g.appendChild(pin);
+  });
+  svg.appendChild(g);
+}
+
+function renderMapLegendMini(){
+  var order = [["excellent","ดีเยี่ยม/ดี"],["moderate","ปานกลาง"],["caution","ควรเลี่ยง"],["avoid","งด"]];
+  document.getElementById("mapLegendMini").innerHTML = order.map(function(o){
+    return '<span><i style="background:'+TIER_COLOR[o[0]]+'"></i>'+o[1]+'</span>';
+  }).join("");
+}
+
+function renderLegendModal(){
+  var order = ["excellent","good","moderate","caution","avoid"];
+  var descs = {
+    excellent:"ออกกำลังกายหนักได้เต็มที่ วิ่ง ปั่นจักรยาน ไม่มีข้อจำกัด",
+    good:"ออกกำลังกายกลางแจ้งได้ตามปกติ",
+    moderate:"กลุ่มเสี่ยง (เด็ก/ผู้สูงอายุ/โรคทางเดินหายใจ) ควรระวังหรือลดเวลา",
+    caution:"ควรเลี่ยงกิจกรรมหนัก แนะนำใส่หน้ากากหรือออกกำลังกายในร่มแทน",
+    avoid:"งดกิจกรรมกลางแจ้งทุกชนิด แนะนำในร่มแทน"
+  };
+  document.getElementById("legendList").innerHTML = order.map(function(t){
+    return '<div class="legend-row">'+badgeHtml(t, t==="excellent"?"ดีเยี่ยม":t==="good"?"ดี":t==="moderate"?"ปานกลาง":t==="caution"?"ควรเลี่ยง":"งด")+
+      '<span class="range tabular">'+TIER_RANGE[t]+'</span>'+
+      '<span class="desc">'+descs[t]+'</span></div>';
+  }).join("");
+}
+
+function forecastChartSvg(park){
+  var todayStr = new Date().toISOString().slice(0,10);
+  var series = (park.forecast_pm25||[]).filter(function(d){ return d.day >= todayStr; });
+  if(series.length===0) return '<p style="color:var(--ink-muted); font-size:0.85rem;">ไม่มีข้อมูลแนวโน้มล่วงหน้า</p>';
+  var W=600,H=180,padL=34,padR=14,padT=14,padB=26;
+  var maxVal = Math.max(80, Math.max.apply(null, series.map(function(d){return d.max||d.avg;})) * 1.15);
+  var innerW = W-padL-padR, innerH = H-padT-padB;
+  function xAt(i){ return padL + (series.length===1?0:(i/(series.length-1))*innerW); }
+  function yAt(v){ return padT + innerH - (v/maxVal)*innerH; }
+  var bands = [
+    {from:0, to:15, color:"var(--status-good)"},
+    {from:15, to:25, color:"var(--status-good)"},
+    {from:25, to:37.5, color:"var(--status-warning)"},
+    {from:37.5, to:75, color:"var(--status-serious)"},
+    {from:75, to:maxVal, color:"var(--status-critical)"}
+  ];
+  var bandRects = bands.map(function(b){
+    if(b.from>=maxVal) return "";
+    var y1=yAt(Math.min(b.to,maxVal)), y2=yAt(b.from);
+    return '<rect x="'+padL+'" y="'+y1+'" width="'+innerW+'" height="'+(y2-y1)+'" fill="'+b.color+'" opacity="0.08"></rect>';
+  }).join("");
+  var points = series.map(function(d,i){ return xAt(i)+","+yAt(d.avg); }).join(" ");
+  var areaPoints = points + " " + xAt(series.length-1)+","+yAt(0) + " " + xAt(0)+","+yAt(0);
+  var dots = series.map(function(d,i){
+    return '<circle class="fc-pt" data-i="'+i+'" cx="'+xAt(i)+'" cy="'+yAt(d.avg)+'" r="9" fill="transparent" style="cursor:pointer;"></circle>'+
+           '<circle cx="'+xAt(i)+'" cy="'+yAt(d.avg)+'" r="3.5" fill="var(--accent-strong)"></circle>';
+  }).join("");
+  var labels = series.map(function(d,i){
+    if(series.length>6 && i%2!==0) return "";
+    var dt = new Date(d.day+"T00:00:00");
+    var lbl = dt.getDate()+"/"+(dt.getMonth()+1);
+    return '<text x="'+xAt(i)+'" y="'+(H-8)+'" font-size="10" text-anchor="middle" fill="var(--ink-muted)">'+lbl+'</text>';
+  }).join("");
+  var svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;" id="forecastSvg">'+
+    bandRects+
+    '<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(H-padB)+'" stroke="var(--border)"></line>'+
+    '<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+(W-padR)+'" y2="'+(H-padB)+'" stroke="var(--border)"></line>'+
+    '<polyline points="'+points+'" fill="none" stroke="var(--accent-strong)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>'+
+    dots+labels+
+  '</svg>';
+  var dataAttr = series.map(function(d){return d.day+'|'+Math.round(d.avg);}).join(",");
+  return '<div class="forecast-svg-wrap" data-series="'+dataAttr+'">'+svg+'<div class="forecast-tooltip" id="fcTooltip"></div></div>';
+}
+
+function wireForecastTooltip(container, park){
+  var wrap = container.querySelector(".forecast-svg-wrap");
+  if(!wrap) return;
+  var tooltip = wrap.querySelector("#fcTooltip");
+  var series = wrap.getAttribute("data-series").split(",").map(function(s){ var parts=s.split("|"); return {day:parts[0], val:parts[1]}; });
+  wrap.querySelectorAll(".fc-pt").forEach(function(pt){
+    pt.addEventListener("mouseenter", function(){
+      var i = parseInt(pt.getAttribute("data-i"),10);
+      var d = series[i];
+      var dt = new Date(d.day+"T00:00:00");
+      tooltip.textContent = dt.getDate()+"/"+(dt.getMonth()+1)+" · PM2.5 "+d.val;
+      tooltip.style.opacity = "1";
+      var cx = pt.getAttribute("cx"), cy = pt.getAttribute("cy");
+      var svgEl = wrap.querySelector("svg");
+      var pct_x = cx / 600 * 100, pct_y = cy/180*100;
+      tooltip.style.left = pct_x + "%";
+      tooltip.style.top = pct_y + "%";
+    });
+    pt.addEventListener("mouseleave", function(){ tooltip.style.opacity = "0"; });
+  });
+}
+
+function openDetail(slug){
+  var p = parks.filter(function(x){return x.slug===slug;})[0];
+  if(!p) return;
+  var modal = document.getElementById("detailModal");
+  var weather = p.weather || {};
+  modal.innerHTML =
+    '<div class="modal-img"><img src="'+p.image+'" alt="'+p.name_th+'"/><button class="modal-close" id="closeDetail" aria-label="ปิด">✕</button></div>'+
+    '<div class="modal-body">'+
+      '<div class="modal-title">'+p.name_th+'<small>'+p.name_en+' · '+p.province+'</small></div>'+
+      '<div class="modal-stat-row">'+
+        '<div class="modal-stat">'+gaugeSvg(p.pm25, p.tier, 76, 8)+
+          '<div class="modal-stat-info"><div class="label">PM2.5 ตอนนี้</div><div class="value">'+badgeHtml(p.tier, p.tier_label_th)+'</div></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="detail-grid">'+
+        '<div class="detail-item"><div class="k">PM10</div><div class="v tabular">'+(p.pm10??"–")+' µg/m³</div></div>'+
+        '<div class="detail-item"><div class="k">AQI รวม</div><div class="v tabular">'+(p.aqi??"–")+'</div></div>'+
+        '<div class="detail-item"><div class="k">มลพิษเด่น</div><div class="v">'+(p.dominant_pollutant?p.dominant_pollutant.toUpperCase():"–")+'</div></div>'+
+        '<div class="detail-item"><div class="k">อุณหภูมิ</div><div class="v tabular">'+(weather.temp_c!==null&&weather.temp_c!==undefined?Math.round(weather.temp_c)+'°C':'–')+'</div></div>'+
+        '<div class="detail-item"><div class="k">ความชื้น</div><div class="v tabular">'+(weather.humidity??"–")+'%</div></div>'+
+        '<div class="detail-item"><div class="k">ลม</div><div class="v tabular">'+(weather.wind_speed??"–")+' m/s</div></div>'+
+      '</div>'+
+      '<div class="activity-box">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4a4 4 0 0 0-4 4c0 3 4 8 4 8s4-5 4-8a4 4 0 0 0-4-4z"/><path d="M9 20c0-3 2-5 4-5s4 2 4 5"/></svg>'+
+        '<span>'+p.activity_th+'</span>'+
+      '</div>'+
+      '<div class="forecast-block"><h4>แนวโน้ม PM2.5 ล่วงหน้า</h4>'+forecastChartSvg(p)+'</div>'+
+      '<div class="meta-row">'+
+        '<span>สถานี: '+(p.station_name||"ไม่ทราบ")+'</span>'+
+        '<span>วัดล่าสุด: '+formatThaiDateTime(p.station_time_iso)+' ('+timeAgoTh(p.station_time_iso)+')</span>'+
+      '</div>'+
+      '<div class="credit-line">ภาพโดย '+p.image_credit.author+' · '+p.image_credit.license+' · <a href="'+p.image_credit.source_url+'" target="_blank" rel="noopener">Wikimedia Commons</a></div>'+
+    '</div>';
+  document.getElementById("closeDetail").addEventListener("click", closeDetail);
+  wireForecastTooltip(modal, p);
+  document.getElementById("detailOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeDetail(){
+  document.getElementById("detailOverlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.getElementById("detailOverlay").addEventListener("click", function(e){
+  if(e.target.id==="detailOverlay") closeDetail();
+});
+
+document.getElementById("legendBtn").addEventListener("click", function(){
+  document.getElementById("legendOverlay").classList.add("open");
+});
+document.getElementById("legendClose").addEventListener("click", function(){
+  document.getElementById("legendOverlay").classList.remove("open");
+});
+document.getElementById("legendOverlay").addEventListener("click", function(e){
+  if(e.target.id==="legendOverlay") document.getElementById("legendOverlay").classList.remove("open");
+});
+document.addEventListener("keydown", function(e){
+  if(e.key==="Escape"){ closeDetail(); document.getElementById("legendOverlay").classList.remove("open"); }
+});
+
+document.getElementById("sortSelect").addEventListener("change", function(e){
+  state.sort = e.target.value; renderCards();
+});
+
+document.getElementById("locateBtn").addEventListener("click", function(){
+  var statusEl = document.getElementById("geoStatus");
+  if(!navigator.geolocation){
+    statusEl.textContent = "เบราว์เซอร์นี้ไม่รองรับการระบุตำแหน่ง";
+    return;
+  }
+  statusEl.textContent = "กำลังขอตำแหน่งของคุณ...";
+  navigator.geolocation.getCurrentPosition(function(pos){
+    state.userLoc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    parks.forEach(function(p){ p._dist = haversineKm(state.userLoc.lat, state.userLoc.lon, p.lat, p.lon); });
+    document.getElementById("distOption").disabled = false;
+    document.getElementById("sortSelect").value = "distance";
+    state.sort = "distance";
+    statusEl.textContent = "พบตำแหน่งของคุณแล้ว เรียงสวนตามระยะทางใกล้สุดก่อน";
+    renderCards();
+  }, function(err){
+    statusEl.textContent = "ไม่สามารถเข้าถึงตำแหน่งได้ กรุณาอนุญาตการเข้าถึงตำแหน่งในเบราว์เซอร์แล้วลองใหม่";
+  }, { timeout: 10000 });
+});
+
+var THEME_KEY = "airpark-theme";
+function applyTheme(mode){
+  if(mode==="dark"){ document.documentElement.setAttribute("data-theme","dark"); }
+  else if(mode==="light"){ document.documentElement.setAttribute("data-theme","light"); }
+  else { document.documentElement.removeAttribute("data-theme"); }
+}
+document.getElementById("themeToggle").addEventListener("click", function(){
+  var current = document.documentElement.getAttribute("data-theme");
+  var next = current==="dark" ? "light" : (current==="light" ? null : "dark");
+  applyTheme(next);
+  try{ localStorage.setItem(THEME_KEY, next||"system"); }catch(e){}
+});
+try{
+  var saved = localStorage.getItem(THEME_KEY);
+  if(saved && saved!=="system") applyTheme(saved);
+}catch(e){}
+
+function renderFooter(){
+  var creditsEl = document.getElementById("creditsList");
+  creditsEl.innerHTML = parks.map(function(p){
+    return '<a href="'+p.image_credit.source_url+'" target="_blank" rel="noopener">'+p.name_th+' — '+p.image_credit.author+'</a>';
+  }).join("");
+  document.getElementById("footerBottom").innerHTML =
+    'หน้าเว็บนี้อัปเดตข้อมูล PM2.5/สภาพอากาศอัตโนมัติทุก 1 ชั่วโมง · อัปเดตล่าสุดของหน้านี้: '+formatThaiDateTime(generatedAt)+
+    ' · ข้อมูลจากสถานีตรวจวัดอาจมีความหน่วงตามรอบของแต่ละสถานี ใช้เป็นแนวทางประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการแพทย์';
+}
+
+function init(){
+  renderProvinceChips();
+  renderHero();
+  renderTopStrip();
+  renderCards();
+  renderMapPins();
+  renderMapLegendMini();
+  renderLegendModal();
+  renderFooter();
+}
+if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded", init); } else { init(); }
+</script>

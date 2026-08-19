@@ -381,7 +381,7 @@ select.sort-select{
 <section class="hero">
   <div class="hero-contour"></div>
   <div class="wrap hero-inner">
-    <div class="eyebrow"><span class="hero-dot"></span> ข้อมูลจริง อัปเดตอัตโนมัติทุก 1 ชั่วโมง</div>
+    <div class="eyebrow"><span class="hero-dot"></span> <span id="eyebrowText">ข้อมูลจริง อัปเดตอัตโนมัติทุก 1 ชั่วโมง</span></div>
     <h1 class="hero-title" id="heroTitle">กำลังโหลดข้อมูลสวน...</h1>
     <p class="hero-sub" id="heroSub"></p>
 
@@ -909,6 +909,12 @@ function renderFooter(){
     ' · ข้อมูลจากสถานีตรวจวัดอาจมีความหน่วงตามรอบของแต่ละสถานี ใช้เป็นแนวทางประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการแพทย์';
 }
 
+function renderLastUpdated(){
+  var el = document.getElementById("eyebrowText");
+  if(!el) return;
+  el.textContent = "อัปเดตอัตโนมัติทุกชั่วโมง · ล่าสุด " + formatThaiDateTime(generatedAt) + " (" + timeAgoTh(generatedAt) + ")";
+}
+
 function init(){
   renderProvinceChips();
   renderHero();
@@ -918,6 +924,7 @@ function init(){
   renderMapLegendMini();
   renderLegendModal();
   renderFooter();
+  renderLastUpdated();
 }
 if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded", init); } else { init(); }
 </script>

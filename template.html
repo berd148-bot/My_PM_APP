@@ -226,15 +226,23 @@ select.sort-select{
 .map-panel h3{font-size:1.05rem; margin-bottom:4px;}
 .map-caption{font-size:0.82rem; color:var(--ink-muted); min-height:2.6em; margin-top:6px;}
 .map-caption b{color:var(--ink); font-weight:700;}
-.map-svg-wrap{position:relative;}
-#thailand-map{width:100%; height:auto; display:block;}
-.map-neighbor{fill:var(--map-neighbor); stroke:none; fill-rule:evenodd;}
-.map-water-shape{fill:var(--map-water); stroke:none; fill-rule:evenodd;}
-.map-thailand-shape{fill:var(--map-thailand); stroke:var(--map-thailand-stroke); stroke-width:1.1; fill-rule:evenodd;}
-.map-pins .pin-halo{fill:none; opacity:0; transition:opacity .15s;}
-.map-pins g.pin{cursor:pointer;}
-.map-pins g.pin:hover .pin-halo, .map-pins g.pin:focus .pin-halo{opacity:0.35;}
-.map-pins .pin-dot{stroke:var(--surface); stroke-width:3;}
+.map-svg-wrap{position:relative; border-radius:14px; overflow:hidden; background:var(--map-water);}
+#thailand-map-img{width:100%; height:auto; display:block;}
+.map-pins-overlay{position:absolute; inset:0; pointer-events:none;}
+.map-pin{
+  position:absolute; transform:translate(-50%,-50%); pointer-events:auto; cursor:pointer;
+  width:26px; height:26px; display:flex; align-items:center; justify-content:center; padding:0; border:none; background:none;
+}
+.map-pin .pin-halo{
+  position:absolute; inset:0; border-radius:50%; opacity:0; transition:opacity .15s, transform .15s; transform:scale(0.6);
+}
+.map-pin:hover .pin-halo, .map-pin:focus-visible .pin-halo{opacity:0.32; transform:scale(1);}
+.map-pin .pin-dot{
+  position:relative; width:13px; height:13px; border-radius:50%;
+  border:2px solid var(--surface); box-shadow:0 2px 5px rgba(10,20,15,0.35);
+  transition:transform .15s;
+}
+.map-pin:hover .pin-dot, .map-pin:focus-visible .pin-dot{transform:scale(1.25);}
 .map-legend-mini{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; font-size:0.74rem; color:var(--ink-muted);}
 .map-legend-mini span{display:inline-flex; align-items:center; gap:5px;}
 .map-legend-mini i{width:9px; height:9px; border-radius:50%; display:inline-block;}
@@ -409,7 +417,8 @@ select.sort-select{
         <h3>แผนที่สถานะอากาศ</h3>
         <div class="map-caption" id="mapCaption">คลิกหมุดเพื่อดูรายละเอียดสวนแต่ละแห่ง</div>
         <div class="map-svg-wrap">
-          <!--__MAP_SVG__-->
+          <img id="thailand-map-img" src="__MAP_IMAGE_DATAURI__" alt="แผนที่ประเทศไทย"/>
+          <div class="map-pins-overlay" id="mapPinsOverlay"></div>
         </div>
         <div class="map-legend-mini" id="mapLegendMini"></div>
       </div>
@@ -671,30 +680,34 @@ function renderCards(){
 }
 
 function renderMapPins(){
-  var svg = document.getElementById("thailand-map");
-  if(!svg) return;
-  var old = svg.querySelector(".map-pins");
-  if(old) old.remove();
-  var g = document.createElementNS("http://www.w3.org/2000/svg","g");
-  g.setAttribute("class","map-pins");
+  var overlay = document.getElementById("mapPinsOverlay");
+  if(!overlay) return;
+  overlay.innerHTML = "";
   parks.forEach(function(p){
     var xy = latLonToXY(p.lat, p.lon);
+    var xPct = (xy.x / PROJECTION.w) * 100;
+    var yPct = (xy.y / PROJECTION.h) * 100;
     var visible = state.province==="all" || p.province===state.province;
-    var pin = document.createElementNS("http://www.w3.org/2000/svg","g");
-    pin.setAttribute("class","pin");
-    pin.setAttribute("tabindex","0");
-    pin.setAttribute("opacity", visible ? "1" : "0.25");
+    var color = TIER_COLOR[p.tier];
+    var pin = document.createElement("button");
+    pin.type = "button";
+    pin.className = "map-pin";
+    pin.style.left = xPct + "%";
+    pin.style.top = yPct + "%";
+    pin.style.opacity = visible ? "1" : "0.3";
+    pin.setAttribute("aria-label", p.name_th);
     pin.innerHTML =
-      '<circle class="pin-halo" cx="'+xy.x+'" cy="'+xy.y+'" r="20" fill="'+TIER_COLOR[p.tier]+'"></circle>'+
-      '<circle class="pin-dot" cx="'+xy.x+'" cy="'+xy.y+'" r="9" fill="'+TIER_COLOR[p.tier]+'"></circle>';
+      '<span class="pin-halo" style="background:'+color+';"></span>'+
+      '<span class="pin-dot" style="background:'+color+';"></span>';
     pin.addEventListener("mouseenter", function(){
       document.getElementById("mapCaption").innerHTML = '<b>'+p.name_th+'</b> · '+p.province+' · PM2.5 '+(p.pm25!==null?Math.round(p.pm25):'–')+' · '+p.tier_label_th;
     });
+    pin.addEventListener("focus", function(){
+      document.getElementById("mapCaption").innerHTML = '<b>'+p.name_th+'</b> · '+p.province+' · PM2.5 '+(p.pm25!==null?Math.round(p.pm25):'–')+' · '+p.tier_label_th;
+    });
     pin.addEventListener("click", function(){ openDetail(p.slug); });
-    pin.addEventListener("keydown", function(e){ if(e.key==="Enter"){ openDetail(p.slug); } });
-    g.appendChild(pin);
+    overlay.appendChild(pin);
   });
-  svg.appendChild(g);
 }
 
 function renderMapLegendMini(){

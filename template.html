@@ -228,9 +228,9 @@ select.sort-select{
 .map-caption b{color:var(--ink); font-weight:700;}
 .map-svg-wrap{position:relative;}
 #thailand-map{width:100%; height:auto; display:block;}
-.map-neighbor{fill:var(--map-neighbor); stroke:none;}
-.map-water-shape{fill:var(--map-water); stroke:none;}
-.map-thailand-shape{fill:var(--map-thailand); stroke:var(--map-thailand-stroke); stroke-width:1.1;}
+.map-neighbor{fill:var(--map-neighbor); stroke:none; fill-rule:evenodd;}
+.map-water-shape{fill:var(--map-water); stroke:none; fill-rule:evenodd;}
+.map-thailand-shape{fill:var(--map-thailand); stroke:var(--map-thailand-stroke); stroke-width:1.1; fill-rule:evenodd;}
 .map-pins .pin-halo{fill:none; opacity:0; transition:opacity .15s;}
 .map-pins g.pin{cursor:pointer;}
 .map-pins g.pin:hover .pin-halo, .map-pins g.pin:focus .pin-halo{opacity:0.35;}

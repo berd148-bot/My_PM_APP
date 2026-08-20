@@ -180,5 +180,44 @@
     "image_source_url": "https://commons.wikimedia.org/wiki/File:%E0%B8%AA%E0%B8%A7%E0%B8%99%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%99%E0%B9%88%E0%B8%B2%E0%B8%99-Public_park_@Nan_River_-_panoramio.jpg",
     "image_license": "CC BY-SA 3.0",
     "image_author": "Wikimedia Commons user '=UT='"
+  },
+  {
+    "slug": "queensirikit",
+    "name_th": "สวนสมเด็จพระนางเจ้าสิริกิติ์",
+    "name_en": "Queen Sirikit Park",
+    "province": "Bangkok",
+    "lat": 13.8067,
+    "lon": 100.55,
+    "image_local_path": "C:\\AI Agent\\Project03\\park_images\\queensirikit.jpg",
+    "image_source_url": "https://commons.wikimedia.org/wiki/File:Queen_Sirikit_Park_1.jpg",
+    "image_license": "CC BY-SA 4.0",
+    "image_author": "Christophe95",
+    "note": "Botanical garden adjoining Chatuchak Park; approx. 140-200 rai (22-32 ha) per Wikipedia."
+  },
+  {
+    "slug": "srinakhonkhueankhan",
+    "name_th": "สวนศรีนครเขื่อนขันธ์",
+    "name_en": "Sri Nakhon Khuean Khan Park and Botanical Garden",
+    "province": "Samut Prakan",
+    "lat": 13.6975,
+    "lon": 100.565,
+    "image_local_path": "C:\\AI Agent\\Project03\\park_images\\srinakhonkhueankhan.jpg",
+    "image_source_url": "https://commons.wikimedia.org/wiki/File:Sri_Nakhon_Khuean_Khan_Park_17.JPG",
+    "image_license": "CC BY-SA 4.0",
+    "image_author": "Ruslik0",
+    "note": "148 rai (23.7 ha) per Wikipedia; large park on the Bang Kachao peninsula, Phra Pradaeng district, popularly considered part of Bangkok's 'green lung.' Technically in Samut Prakan province, not Bangkok proper."
+  },
+  {
+    "slug": "seri_thai",
+    "name_th": "สวนเสรีไทย",
+    "name_en": "Seri Thai Park",
+    "province": "Bangkok",
+    "lat": 13.787,
+    "lon": 100.674,
+    "image_local_path": "C:\\AI Agent\\Project03\\park_images\\seri_thai.jpg",
+    "image_source_url": "https://commons.wikimedia.org/wiki/File:Suan_Seri_Thai.jpg",
+    "image_license": "CC BY-SA 4.0",
+    "image_author": "Phoebus 28",
+    "note": "138 acres (56 ha, approx. 345 rai) per Wikipedia; large park with a big reservoir lake in Bueng Kum district."
   }
 ]
